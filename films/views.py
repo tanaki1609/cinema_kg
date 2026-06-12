@@ -1,13 +1,53 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Film
+from .models import Film, Genre, Director
 from .serializers import (
     FilmListSerializer,
     FilmDetailSerializer,
-    FilmValidateSerializer
+    FilmValidateSerializer,
+    GenreSerializer,
+    DirectorSerializer,
+    DirectorValidateSerializer
 )
 from django.db import transaction
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+
+
+class CustomPagination(PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'total': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'results': data,
+        })
+
+
+class GenreListCreateAPIView(ListCreateAPIView):
+    queryset = Genre.objects.all()  # list
+    serializer_class = GenreSerializer  # class serializer (ModelSerializer)
+    pagination_class = CustomPagination
+
+
+class GenreDetailAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'id'
+
+
+class DirectorViewSet(ModelViewSet):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    pagination_class = CustomPagination
+    lookup_field = 'id'
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT']:
+            return DirectorValidateSerializer
+        return self.serializer_class
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
