@@ -31,3 +31,21 @@ class Film(models.Model):
 
     def __str__(self):
         return self.title
+
+    def genre_list(self):
+        return [i.name for i in self.genres.all()]
+
+
+STARS = (
+    (i, '* ' * i) for i in range(1, 11)
+)
+
+
+class Review(models.Model):
+    text = models.TextField()
+    stars = models.IntegerField(choices=STARS, default=7)
+    film = models.ForeignKey(Film, on_delete=models.CASCADE,
+                             related_name='reviews')
+
+    def __str__(self):
+        return self.text
