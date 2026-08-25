@@ -1,9 +1,26 @@
 from django.db import models
 
 
-# Create your models here.
+class Director(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    birthday = models.DateField()
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+
+class Genre(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
 
 class Film(models.Model):
+    genres = models.ManyToManyField(Genre)
+    director = models.ForeignKey(Director, on_delete=models.PROTECT,
+                                 null=True)  # director_id
     title = models.CharField(max_length=255)
     text = models.TextField(null=True, blank=True)
     release_year = models.IntegerField()
